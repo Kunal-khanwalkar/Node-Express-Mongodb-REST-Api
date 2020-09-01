@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const multer = require('multer');
+const ngrok = require('ngrok');
 require('dotenv/config');
 
 app.use(express.json());
@@ -27,3 +28,8 @@ mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true, useUnifiedT
 //Server start
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening to port ${port}...`));
+
+(async () => {
+	const url = await ngrok.connect(port);
+	console.log(`Hosting on url ${url}`);
+})();

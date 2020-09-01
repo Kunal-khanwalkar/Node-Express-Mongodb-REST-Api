@@ -142,3 +142,5 @@ router.put('/api/products/:name', async (req,res) => {
 
 
 module.exports = router;
+
+//Thank you, our lord and saviour POSTMAN Rest client
