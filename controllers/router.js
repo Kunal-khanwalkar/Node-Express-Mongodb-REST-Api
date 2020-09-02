@@ -71,9 +71,16 @@ router.get('/api/products/:name', async (req,res) => {
 					}
 				}
 			]);		
+
+		if(JSON.stringify(product) == '[]')
+		{
+			res.status(404).send('404 product not found');
+			return;
+		}			
+
 		res.status(200).json(product);
 	} catch(err) {				
-		res.status(404).send('404 Product not found');
+		res.status(400).json({message: err});
 	}
 
 });
@@ -86,7 +93,7 @@ router.post('/api/products', async (req,res) => {
 		name: req.body.name,
 		description: req.body.description,		
 		image: {
-			data: fs.readFileSync(path.join(__dirname, '../uploads/' + req.body.image)),
+			data: fs.readFileSync(path.join(__dirname, '../uploads/' + req.body.image)).toString('base64'),
 			contentType: 'image/png'
 		},
 		price: req.body.price,
@@ -107,8 +114,16 @@ router.post('/api/products', async (req,res) => {
 router.delete('/api/products/:name', async (req,res) => {
 
 	try{
-		const products = await Product.remove({name: req.params.name});
-		res.status(200).json(products);
+		const prod = await Product.find({name: req.params.name});		
+		if(JSON.stringify(prod) == '[]')
+		{
+			res.status(404).send('404 product not found');
+			return;
+		}
+
+		const product = await Product.deleteOne({name: req.params.name});			
+		res.status(200).json(product);
+
 	} catch(err) {
 		res.status(400).json({message: err});
 	}
@@ -119,14 +134,21 @@ router.delete('/api/products/:name', async (req,res) => {
 router.put('/api/products/:name', async (req,res) => {
 
 	try{
-		const products = await Product.updateOne(
+		const prod = await Product.find({name: req.params.name});		
+		if(JSON.stringify(prod) == '[]')
+		{
+			res.status(404).send('404 product not found');
+			return;
+		}
+
+		const product = await Product.updateOne(
 				{name: req.params.name},
 				{ 
 					$set: {
 						name: req.body.name,
 						description: req.body.description,		
 						image: {
-							data: fs.readFileSync(path.join(__dirname, '../uploads/' + req.body.image)),
+							data: fs.readFileSync(path.join(__dirname, '../uploads/' + req.body.image)).toString('base64'),
 							contentType: 'image/png'
 						},
 						price: req.body.price,
@@ -134,13 +156,21 @@ router.put('/api/products/:name', async (req,res) => {
 					}
 				}
 			);
-		res.status(200).json(products);
+
+		res.status(200).json(product);
 	} catch(err) {
 		res.status(400).json({message: err});
 	}
 });
 
 
+//404 error for other routes
+router.get('*', (req,res) => {	
+	res.status(404).send({error: '404, Page not found'});
+});
+
+
 module.exports = router;
 
-//Thank you, our lord and saviour POSTMAN Rest client
+
+//I, as a backend developer, thank our lord and saviour POSTMAN Rest client for blessing us with their power.

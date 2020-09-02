@@ -6,6 +6,7 @@ const ngrok = require('ngrok');
 require('dotenv/config');
 
 app.use(express.json());
+mongoose.set('runValidators', true);
 
 //Router
 const routes = require('./controllers/router');
